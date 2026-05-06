@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>매출 차트 — 2026년 1~2월</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
+  background: #f0f7ff;
+  color: #1e293b;
+  padding: 36px 24px 60px;
+}
+.wrapper { max-width: 1160px; margin: 0 auto; }
+
+/* ── Header ── */
+.page-header { text-align: center; margin-bottom: 32px; }
+.page-header h1 {
+  font-size: 26px; font-weight: 800; color: #1e3a8a; margin-bottom: 5px;
+}
+.page-header p { font-size: 13px; color: #64748b; }
+
+/* ── KPI row ── */
+.kpi-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 22px;
+}
+.kpi {
+  background: #fff; border-radius: 12px; padding: 18px 16px 16px;
+  box-shadow: 0 2px 8px rgba(30,58,138,0.07);
+  border-top: 3px solid var(--c, #3b82f6);
+  text-align: center;
+}
+.kpi:nth-child(2) { --c: #0891b2; }
+.kpi:nth-child(3) { --c: #059669; }
+.kpi:nth-child(4) { --c: #6366f1; }
+.kpi-label { font-size: 11.5px; font-weight: 700; color: #64748b; letter-spacing: 0.3px; margin-bottom: 6px; text-transform: uppercase; }
+.kpi-value { font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1; }
+.kpi-value em { font-size: 13px; font-weight: 500; color: #94a3b8; font-style: normal; margin-left: 2px; }
+.kpi-sub { font-size: 11px; color: #94a3b8; margin-top: 5px; }
+
+/* ── Chart layout ── */
+.chart-row {
+  display: grid; grid-template-columns: 3fr 2fr; gap: 18px;
+}
+.chart-card {
+  background: #fff; border-radius: 14px; padding: 24px 24px 18px;
+  box-shadow: 0 2px 10px rgba(30,58,138,0.07);
+}
+.chart-card-title { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+.chart-card-sub   { font-size: 12px; color: #94a3b8; margin-bottom: 14px; }
+svg { display: block; width: 100%; overflow: visible; }
+
+/* ── Tooltip ── */
+#tip {
+  position: fixed; z-index: 200;
+  background: #0f172a; color: #e2e8f0;
+  padding: 9px 13px; border-radius: 9px;
+  font-size: 12px; font-weight: 600; line-height: 1.7;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.12s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ── Print ── */
+@media print {
+  body { background: #fff; padding: 0; }
+  .chart-card { box-shadow: none; border: 1px solid #e2e8f0; break-inside: avoid; }
+  #tip { display: none; }
+}
+@media (max-width: 740px) {
+  .chart-row { grid-template-columns: 1fr; }
+  .kpi-row   { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header class="page-header">
+    <h1>매출 분석 차트</h1>
+    <p>2026년 1월 ~ 2월 · 마케팅팀 데이터 기준 (매출데이터.csv)</p>
+  </header>
+
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">총 매출</div>
+      <div class="kpi-value">7,101<em>만원</em></div>
+      <div class="kpi-sub">1~2월 누적</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1월 매출</div>
+      <div class="kpi-value">4,650<em>만원</em></div>
+      <div class="kpi-sub">21건 거래</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2월 매출</div>
+      <div class="kpi-value">2,451<em>만원</em></div>
+      <div class="kpi-sub">9건 집계중</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총 판매수량</div>
+      <div class="kpi-value">1,664<em>개</em></div>
+      <div class="kpi-sub">30건 거래</div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="chart-card-title">일별 매출 추이</div>
+      <div class="chart-card-sub">거래일 기준 · 단위: 만원 · 마우스를 올리면 상세 수치가 표시됩니다</div>
+      <svg id="lineChart" viewBox="0 0 580 262" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">제품별 누적 매출</div>
+      <div class="chart-card-sub">전체 기간 합계 · 단위: 만원</div>
+      <svg id="barChart" viewBox="0 0 460 302" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+
+</div>
+<div id="tip"></div>
+
+<script>
+/* ── helpers ────────────────────────────────────── */
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+}
+function wan(v)    { return Math.round(v / 10000).toLocaleString('ko-KR'); }
+function full(v)   { return v.toLocaleString('ko-KR'); }
+
+/* ── data ───────────────────────────────────────── */
+const daily = [
+  { date:'1/5',  v:7075000  },
+  { date:'1/8',  v:8413000  },
+  { date:'1/12', v:4135000  },
+  { date:'1/15', v:8122000  },
+  { date:'1/19', v:5060000  },
+  { date:'1/22', v:9029000  },
+  { date:'1/26', v:4665000  },
+  { date:'2/1',  v:10110000 },
+  { date:'2/5',  v:6195000  },
+  { date:'2/10', v:8202000  },
+];
+
+const products = [
+  { name:'무선 이어폰',     v:28836000 },
+  { name:'텀블러',          v:11525000 },
+  { name:'블루투스 스피커', v:9600000  },
+  { name:'보조배터리',      v:9030000  },
+  { name:'에코백',          v:6165000  },
+  { name:'무선 충전기',     v:5850000  },
+];
+
+/* ══════════════════════════════════════════════════
+   LINE CHART
+══════════════════════════════════════════════════ */
+(function () {
+  const svg = document.getElementById('lineChart');
+  const W = 580, H = 262;
+  const pl = 66, pr = 20, pt = 22, pb = 46;
+  const pw = W - pl - pr;   // 494
+  const ph = H - pt - pb;   // 194
+  const MAX = 11000000;
+  const n   = daily.length;
+
+  const xS = i => pl + i * pw / (n - 1);
+  const yS = v => pt + ph - (v / MAX) * ph;
+
+  /* defs */
+  const defs = el('defs');
+
+  const aGrad = el('linearGradient', { id:'lg-area', x1:'0', y1:'0', x2:'0', y2:'1' });
+  aGrad.appendChild(el('stop', { offset:'0%',   'stop-color':'#3b82f6', 'stop-opacity':'0.32' }));
+  aGrad.appendChild(el('stop', { offset:'100%', 'stop-color':'#3b82f6', 'stop-opacity':'0.02' }));
+
+  const lGrad = el('linearGradient', { id:'lg-line', x1:'0', y1:'0', x2:'1', y2:'0' });
+  lGrad.appendChild(el('stop', { offset:'0%',   'stop-color':'#1d4ed8' }));
+  lGrad.appendChild(el('stop', { offset:'100%', 'stop-color':'#0ea5e9' }));
+
+  defs.append(aGrad, lGrad);
+  svg.appendChild(defs);
+
+  /* y grid + labels */
+  const gridVals = [0, 2500000, 5000000, 7500000, 10000000];
+  gridVals.forEach(v => {
+    const y = yS(v);
+    const isDash = v > 0;
+    svg.appendChild(el('line', {
+      x1: pl, y1: y, x2: W - pr, y2: y,
+      stroke: '#e2e8f0', 'stroke-width': '1',
+      'stroke-dasharray': isDash ? '4,3' : ''
+    }));
+    svg.appendChild(el('text', {
+      x: pl - 7, y: y + 4,
+      'text-anchor': 'end', 'font-size': '10',
+      fill: '#94a3b8', 'font-family': 'inherit'
+    }, wan(v)));
+  });
+
+  /* month separator between 1/26 and 2/1 */
+  const sepX = (xS(6) + xS(7)) / 2;
+  svg.appendChild(el('line', {
+    x1: sepX, y1: pt, x2: sepX, y2: pt + ph,
+    stroke: '#cbd5e1', 'stroke-width': '1', 'stroke-dasharray': '5,4'
+  }));
+  svg.appendChild(el('text', {
+    x: sepX - 5, y: pt + ph + 28,
+    'text-anchor': 'end', 'font-size': '9.5',
+    fill: '#3b82f6', 'font-weight': '700', 'font-family': 'inherit'
+  }, '1월'));
+  svg.appendChild(el('text', {
+    x: sepX + 5, y: pt + ph + 28,
+    'text-anchor': 'start', 'font-size': '9.5',
+    fill: '#0891b2', 'font-weight': '700', 'font-family': 'inherit'
+  }, '2월'));
+
+  /* x axis baseline */
+  svg.appendChild(el('line', {
+    x1: pl, y1: pt + ph, x2: W - pr, y2: pt + ph,
+    stroke: '#cbd5e1', 'stroke-width': '1.5'
+  }));
+
+  /* area fill */
+  const aD = [
+    `M${xS(0)},${pt + ph}`,
+    ...daily.map((d, i) => `L${xS(i)},${yS(d.v)}`),
+    `L${xS(n - 1)},${pt + ph}`, 'Z'
+  ].join(' ');
+  svg.appendChild(el('path', { d: aD, fill: 'url(#lg-area)', stroke: 'none' }));
+
+  /* line */
+  const lD = daily.map((d, i) => `${i === 0 ? 'M' : 'L'}${xS(i)},${yS(d.v)}`).join(' ');
+  svg.appendChild(el('path', {
+    d: lD, fill: 'none', stroke: 'url(#lg-line)',
+    'stroke-width': '2.5', 'stroke-linejoin': 'round', 'stroke-linecap': 'round'
+  }));
+
+  /* dots */
+  daily.forEach((d, i) => {
+    svg.appendChild(el('circle', {
+      cx: xS(i), cy: yS(d.v), r: '4.5',
+      fill: '#3b82f6', stroke: '#fff', 'stroke-width': '2'
+    }));
+  });
+
+  /* x labels */
+  daily.forEach((d, i) => {
+    svg.appendChild(el('text', {
+      x: xS(i), y: pt + ph + 16,
+      'text-anchor': 'middle', 'font-size': '10',
+      fill: '#64748b', 'font-family': 'inherit'
+    }, d.date));
+  });
+
+  /* hover line */
+  const hLine = el('line', {
+    x1: 0, y1: pt, x2: 0, y2: pt + ph,
+    stroke: '#94a3b8', 'stroke-width': '1', 'stroke-dasharray': '4,3',
+    opacity: '0', 'pointer-events': 'none'
+  });
+  svg.appendChild(hLine);
+
+  /* hit area + tooltip */
+  const tip = document.getElementById('tip');
+  const hit = el('rect', {
+    x: pl, y: pt, width: pw, height: ph,
+    fill: 'transparent', style: 'cursor:crosshair'
+  });
+
+  hit.addEventListener('mousemove', e => {
+    const rect = svg.getBoundingClientRect();
+    const mx   = (e.clientX - rect.left) * (W / rect.width);
+    let ci = 0, md = Infinity;
+    daily.forEach((_, i) => {
+      const d = Math.abs(xS(i) - mx);
+      if (d < md) { md = d; ci = i; }
+    });
+    const d = daily[ci];
+    hLine.setAttribute('x1', xS(ci));
+    hLine.setAttribute('x2', xS(ci));
+    hLine.setAttribute('opacity', '0.55');
+    tip.innerHTML = `<span style="color:#94a3b8">${d.date}</span><br><strong style="font-size:13px">${wan(d.v)}만원</strong><br><span style="color:#64748b;font-weight:400">${full(d.v)}원</span>`;
+    tip.style.opacity = '1';
+    tip.style.left = (e.clientX + 16) + 'px';
+    tip.style.top  = (e.clientY - 46) + 'px';
+  });
+  hit.addEventListener('mouseleave', () => {
+    hLine.setAttribute('opacity', '0');
+    tip.style.opacity = '0';
+  });
+  svg.appendChild(hit);
+})();
+
+/* ══════════════════════════════════════════════════
+   BAR CHART
+══════════════════════════════════════════════════ */
+(function () {
+  const svg = document.getElementById('barChart');
+  const W = 460, H = 302;
+  const pl = 114, pr = 68, pt = 12, pb = 12;
+  const pw  = W - pl - pr;   // 278
+  const barH = 30;
+  const n    = products.length;
+  const gap  = (H - pt - pb - n * barH) / (n - 1);  // ≈ 18.4
+  const maxV = products[0].v;
+
+  const yP = i => pt + i * (barH + gap);
+
+  /* colour palette: blue → teal → green */
+  const colours = ['#2563eb', '#0891b2', '#0d9488', '#059669', '#16a34a', '#15803d'];
+
+  const defs = el('defs');
+
+  products.forEach((d, i) => {
+    /* per-bar gradient */
+    const gid = `bg${i}`;
+    const g = el('linearGradient', { id: gid, x1:'0', y1:'0', x2:'1', y2:'0' });
+    g.appendChild(el('stop', { offset:'0%',   'stop-color': colours[i] }));
+    g.appendChild(el('stop', { offset:'100%', 'stop-color': colours[Math.min(i + 1, colours.length - 1)] }));
+    defs.appendChild(g);
+  });
+  svg.appendChild(defs);
+
+  /* store target widths for animation */
+  const targets = [];
+
+  products.forEach((d, i) => {
+    const y    = yP(i);
+    const tgtW = (d.v / maxV) * pw;
+    targets.push(tgtW);
+
+    /* track */
+    svg.appendChild(el('rect', {
+      x: pl, y, width: pw, height: barH,
+      fill: '#f1f5f9', rx: 6
+    }));
+
+    /* bar (starts at 0, animated below) */
+    const bar = el('rect', {
+      x: pl, y, width: '0', height: barH,
+      fill: `url(#bg${i})`, rx: 6
+    });
+    svg.appendChild(bar);
+
+    /* label left */
+    svg.appendChild(el('text', {
+      x: pl - 8, y: y + barH / 2 + 4,
+      'text-anchor': 'end', 'font-size': '11',
+      fill: '#334155', 'font-family': 'inherit'
+    }, d.name));
+
+    /* value right (initially hidden) */
+    const valText = el('text', {
+      x: pl + 4, y: y + barH / 2 + 4,
+      'font-size': '11', fill: colours[i],
+      'font-weight': '700', 'font-family': 'inherit',
+      opacity: '0'
+    }, wan(d.v) + '만');
+    svg.appendChild(valText);
+
+    /* animate bar width */
+    const DURATION = 700;
+    const DELAY    = i * 90;
+    let startTs = null;
+
+    function step(ts) {
+      if (!startTs) startTs = ts;
+      const elapsed = ts - startTs;
+      const prog = Math.min(elapsed / DURATION, 1);
+      const ease = 1 - Math.pow(1 - prog, 3);
+      bar.setAttribute('width', tgtW * ease);
+      if (prog >= 0.6) {
+        valText.setAttribute('x', pl + tgtW * ease + 7);
+        valText.setAttribute('opacity', String(Math.min((prog - 0.6) / 0.4, 1)));
+      }
+      if (prog < 1) requestAnimationFrame(step);
+      else {
+        bar.setAttribute('width', tgtW);
+        valText.setAttribute('x', pl + tgtW + 7);
+        valText.setAttribute('opacity', '1');
+      }
+    }
+    setTimeout(() => requestAnimationFrame(step), DELAY);
+  });
+})();
+</script>
+</body>
+</html>

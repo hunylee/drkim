@@ -1,0 +1,63 @@
+<svg width="800" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .step-box { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.08)); }
+      .step-text { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif; font-size: 16px; font-weight: 700; text-anchor: middle; }
+      .step-label { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif; font-size: 12px; text-anchor: middle; opacity: 0.7; }
+      .arrow-line { stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+      .arrow-marker { fill: #999; }
+    </style>
+
+    <!-- Arrow marker -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" class="arrow-marker"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1: 기획 (Planning) - Soft Coral/Pink -->
+  <g class="step-box">
+    <rect x="30" y="60" width="120" height="80" rx="16" ry="16" fill="#f5d5d5" stroke="#e8a8a8" stroke-width="2"/>
+    <text x="90" y="100" class="step-text" fill="#c44545">기획</text>
+    <text x="90" y="125" class="step-label" fill="#333">Planning</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <line x1="155" y1="100" x2="190" y2="100" class="arrow-line" stroke="#999"/>
+
+  <!-- Step 2: 제작 (Production) - Soft Yellow -->
+  <g class="step-box">
+    <rect x="195" y="60" width="120" height="80" rx="16" ry="16" fill="#fffacd" stroke="#f0e68c" stroke-width="2"/>
+    <text x="255" y="100" class="step-text" fill="#d4a500">제작</text>
+    <text x="255" y="125" class="step-label" fill="#333">Production</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <line x1="320" y1="100" x2="355" y2="100" class="arrow-line" stroke="#999"/>
+
+  <!-- Step 3: 검토 (Review) - Soft Blue -->
+  <g class="step-box">
+    <rect x="360" y="60" width="120" height="80" rx="16" ry="16" fill="#d5e8f5" stroke="#a8d0e8" stroke-width="2"/>
+    <text x="420" y="100" class="step-text" fill="#4575b4">검토</text>
+    <text x="420" y="125" class="step-label" fill="#333">Review</text>
+  </g>
+
+  <!-- Arrow 3 -->
+  <line x1="485" y1="100" x2="520" y2="100" class="arrow-line" stroke="#999"/>
+
+  <!-- Step 4: 배포 (Deployment) - Soft Green -->
+  <g class="step-box">
+    <rect x="525" y="60" width="120" height="80" rx="16" ry="16" fill="#d5f5e8" stroke="#a8e8d0" stroke-width="2"/>
+    <text x="585" y="100" class="step-text" fill="#2d9b6d">배포</text>
+    <text x="585" y="125" class="step-label" fill="#333">Deployment</text>
+  </g>
+
+  <!-- Arrow 4 -->
+  <line x1="650" y1="100" x2="685" y2="100" class="arrow-line" stroke="#999"/>
+
+  <!-- Step 5: 분석 (Analysis) - Soft Purple -->
+  <g class="step-box">
+    <rect x="690" y="60" width="120" height="80" rx="16" ry="16" fill="#e8d5f5" stroke="#d0a8e8" stroke-width="2"/>
+    <text x="750" y="100" class="step-text" fill="#6d4596">분석</text>
+    <text x="750" y="125" class="step-label" fill="#333">Analysis</text>
+  </g>
+</svg>
