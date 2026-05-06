@@ -388,6 +388,8 @@ h1 {
   border-radius: 8px;
   transition: all var(--transition);
   display: flex; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px;
+  display: none;
 }
 .nav-toggle:hover {
   background: var(--hover-bg);
@@ -400,6 +402,7 @@ h1 {
   margin: 0 auto;
   max-width: 1280px;
   transition: opacity var(--transition);
+  flex: 1;
 }
 .nav-menu.collapsed .nav-container { width: auto; }
 .nav-menu.collapsed .nav-item-text {
@@ -420,6 +423,8 @@ h1 {
   position: relative;
   letter-spacing: 0.3px;
   display: flex; align-items: center; gap: 6px;
+  min-height: 44px;
+  white-space: nowrap;
 }
 .nav-item:hover {
   color: var(--text-primary);
@@ -434,9 +439,152 @@ h1 {
 body { padding: 92px 24px 48px; }
 
 /* ─── Responsive ────────────────────────────────────────────────── */
-@media (max-width: 860px) {
+
+/* Tablet: 480px ~ 1024px */
+@media (max-width: 1024px) {
   .grid { grid-template-columns: 1fr; }
-  body { padding: 20px 16px 40px; }
+  h1 { font-size: 26px; }
+  .card { padding: 20px; border-radius: 16px; }
+  .card-title { font-size: 16px; margin-bottom: 16px; }
+  .card-title .icon { width: 30px; height: 30px; font-size: 15px; }
+
+  .nav-item { padding: 14px 14px; font-size: 12px; }
+  .nav-item-text { max-width: 100px; }
+
+  /* Tablet: 테이블 스크롤 가능 */
+  .schedule-table { font-size: 11px; }
+  .schedule-table th { padding: 8px 4px; font-size: 12px; }
+  .schedule-table td { padding: 7px 4px; font-size: 11px; }
+  .time-badge { font-size: 9px; padding: 2px 5px; }
+  .event-text { font-size: 10px; }
+
+  /* Tablet: 매출 카드 */
+  .sales-cards { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .sales-card { padding: 16px; }
+  .sales-card .value { font-size: 22px; }
+
+  /* Tablet: 프로젝트 폰트 */
+  .project-name { font-size: 13px; }
+  .project-percent { font-size: 13px; }
+
+  body { padding: 80px 16px 40px; }
+}
+
+/* Mobile: < 480px */
+@media (max-width: 480px) {
+  body { padding: 68px 12px 40px; }
+
+  /* Header */
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  .subtitle-row { font-size: 12px; }
+  .header { margin-bottom: 24px; }
+
+  /* Navigation */
+  .nav-menu { padding: 0 12px; height: 60px; }
+  .nav-toggle { display: flex; }
+  .nav-container {
+    position: absolute;
+    top: 60px; left: 0; right: 0;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--card-border);
+    flex-direction: column;
+    max-width: none;
+    gap: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .nav-menu:not(.collapsed) .nav-container {
+    max-height: 300px;
+  }
+  .nav-item {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--divider);
+    border-bottom-color: var(--divider);
+    justify-content: flex-start;
+  }
+  .nav-item.active { border-bottom: 1px solid var(--accent); }
+
+  /* Theme toggle */
+  .theme-toggle { width: 40px; height: 40px; font-size: 18px; top: 14px; right: 14px; }
+
+  /* Grid */
+  .grid { gap: 16px; }
+
+  /* Card */
+  .card { padding: 16px; border-radius: 14px; }
+  .card-title { font-size: 14px; margin-bottom: 12px; gap: 8px; }
+  .card-title .icon { width: 28px; height: 28px; font-size: 14px; }
+
+  /* Todo item */
+  .todo-item { padding: 8px 10px; margin-bottom: 4px; gap: 8px; }
+  .todo-item input[type="checkbox"] { width: 16px; height: 16px; }
+  .todo-text { font-size: 13px; }
+  .todo-meta { font-size: 10px; }
+  .badge { font-size: 9px; padding: 2px 6px; }
+
+  /* Schedule table - 스크롤 가능 */
+  .card:nth-child(2) { overflow-x: auto; }
+  .schedule-table {
+    font-size: 10px;
+    min-width: 380px;
+  }
+  .schedule-table th {
+    padding: 6px 3px;
+    font-size: 11px;
+  }
+  .schedule-table td {
+    padding: 5px 3px;
+    font-size: 10px;
+    word-break: break-word;
+  }
+  .time-badge { font-size: 8px; padding: 1px 4px; margin-bottom: 2px; }
+  .event-text { font-size: 9px; line-height: 1.4; }
+
+  /* Project section */
+  .project-item { margin-bottom: 14px; }
+  .project-name { font-size: 12px; }
+  .project-percent { font-size: 12px; }
+  .project-meta { font-size: 10px; flex-wrap: wrap; gap: 4px; }
+  .status-tag { font-size: 9px; padding: 2px 6px; }
+  .progress-bar { height: 6px; }
+
+  /* Sales cards */
+  .sales-cards { grid-template-columns: 1fr; gap: 10px; }
+  .sales-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .sales-card .label { font-size: 11px; margin-bottom: 6px; }
+  .sales-card .value { font-size: 20px; }
+  .sales-card .unit { font-size: 12px; }
+  .sales-card .change { font-size: 10px; margin-top: 4px; }
+
+  /* Sales breakdown */
+  .sales-breakdown { margin-top: 16px; padding-top: 12px; }
+  .breakdown-title { font-size: 11px; margin-bottom: 10px; }
+  .breakdown-item {
+    padding: 4px 0;
+    font-size: 11px;
+  }
+  .breakdown-item > span:first-child { min-width: 70px; font-size: 10px; }
+  .breakdown-bar { margin: 0 8px; }
+  .breakdown-amount { font-size: 11px; }
+
+  /* Disable ambient orbs on mobile for performance */
+  body::before, body::after, .orb3 {
+    display: none;
+  }
+}
+
+/* Extra small: < 360px */
+@media (max-width: 360px) {
+  body { padding: 64px 10px 36px; }
+  h1 { font-size: 20px; }
+  .card { padding: 12px; }
+  .card-title { font-size: 13px; }
+  .nav-item { padding: 10px 12px; font-size: 12px; }
 }
 </style>
 </head>
@@ -775,6 +923,7 @@ body { padding: 92px 24px 48px; }
   const html = document.documentElement;
   const btn  = document.getElementById('toggleBtn');
   const navMenu = document.getElementById('navMenu');
+  const isMobile = () => window.innerWidth <= 480;
 
   function applyTheme(theme) {
     html.setAttribute('data-theme', theme);
@@ -797,20 +946,38 @@ body { padding: 92px 24px 48px; }
   const saved = localStorage.getItem('dashboard-theme') || 'dark';
   applyTheme(saved);
 
-  // 저장된 메뉴 상태 복원
-  const navCollapsed = localStorage.getItem('nav-collapsed') === 'true';
-  if (navCollapsed) {
+  // 모바일에서는 기본으로 메뉴 닫음, 데스크톱에서는 메뉴 열기
+  const navCollapsed = localStorage.getItem('nav-collapsed');
+  if (isMobile()) {
+    navMenu.classList.add('collapsed');
+  } else if (navCollapsed === 'true') {
     navMenu.classList.add('collapsed');
   }
 
-  // 네비게이션 링크 클릭 시 페이지 이동
+  // 네비게이션 링크 클릭 시 페이지 이동 + 모바일에서 메뉴 닫기
   document.querySelectorAll('.nav-item').forEach(link => {
     link.addEventListener('click', (e) => {
       const href = link.getAttribute('href');
+      // 모바일에서는 메뉴 닫기
+      if (isMobile()) {
+        navMenu.classList.add('collapsed');
+      }
       if (href) {
         window.location.href = href;
       }
     });
+  });
+
+  // 창 리사이즈 시 반응형 처리
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      // 모바일 → 데스크톱 전환 시 메뉴 자동 열기
+      if (!isMobile() && navMenu.classList.contains('collapsed')) {
+        navMenu.classList.remove('collapsed');
+      }
+    }, 250);
   });
 </script>
 </body>
